@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Journal on architecture design/decisions/lessons along the way
+journal/
+
+# Local data (never commit; see docs/adr/001)
+data/
