@@ -24,9 +24,9 @@ def test_floor_to_slot_rejects_naive():
 
 def test_keys_are_partitioned_and_paired():
     slot = bronze.floor_to_slot(NOW)
-    assert bronze.raw_key("station_status", slot) == (
-        "feed=station_status/dt=2026-11-04/hour=07/station_status_20261104T071500Z.json.gz"
+    assert bronze.raw_key("nyc", "station_status", slot) == (
+        "city=nyc/feed=station_status/dt=2026-11-04/hour=07/station_status_20261104T071500Z.json.gz"
     )
-    assert bronze.meta_key("station_status", slot).endswith(
+    assert bronze.meta_key("nyc", "station_status", slot).endswith(
         "station_status_20261104T071500Z.meta.json"
     )

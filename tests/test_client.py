@@ -37,5 +37,11 @@ def test_4xx_fails_fast_without_retry():
     assert sleeps == []
 
 
-def test_feed_url():
-    assert client.feed_url("station_status").endswith("/en/station_status.json")
+def test_city_feed_url():
+    city = client.get_city("nyc")
+    assert city.feed_url("station_status").endswith("/en/station_status.json")
+
+
+def test_unknown_city_lists_known_ones():
+    with pytest.raises(ValueError, match="known: nyc"):
+        client.get_city("atlantis")

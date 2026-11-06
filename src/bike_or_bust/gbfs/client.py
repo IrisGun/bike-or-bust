@@ -7,11 +7,9 @@ import time
 import urllib.error
 import urllib.request
 from collections.abc import Callable
+from dataclasses import dataclass
 
 log = logging.getLogger(__name__)
-
-BASE_URL = "https://gbfs.lyft.com/gbfs/1.1/bkn/en"
-FEEDS = ("station_status", "station_information")
 
 Fetcher = Callable[[str], bytes]
 
@@ -20,8 +18,36 @@ class FetchError(Exception):
     """The source could not be read or returned unusable data (not a bug in our code)."""
 
 
-def feed_url(feed: str) -> str:
-    return f"{BASE_URL}/{feed}.json"
+@dataclass(frozen=True)
+class City:
+    """A GBFS bike-share system. Adding a city means adding one entry to CITIES."""
+
+    id: str
+    name: str
+    timezone: str
+    base_url: str
+    feeds: tuple[str, ...] = ("station_status", "station_information")
+
+    def feed_url(self, feed: str) -> str:
+        return f"{self.base_url}/{feed}.json"
+
+
+# Take NYC as the pioneer for now
+CITIES: dict[str, City] = {
+    "nyc": City(
+        id="nyc",
+        name="New York City",
+        timezone="America/New_York",
+        base_url="https://gbfs.lyft.com/gbfs/1.1/bkn/en",
+    ),
+}
+
+
+def get_city(city_id: str) -> City:
+    try:
+        return CITIES[city_id]
+    except KeyError:
+        raise ValueError(f"unknown city {city_id!r}; known: {', '.join(sorted(CITIES))}") from None
 
 
 def http_fetch(url: str, timeout: float = 30) -> bytes:

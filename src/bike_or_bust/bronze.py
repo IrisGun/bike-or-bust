@@ -20,17 +20,18 @@ def floor_to_slot(ts: datetime, minutes: int = SLOT_MINUTES) -> datetime:
     return ts.replace(minute=ts.minute - ts.minute % minutes, second=0, microsecond=0)
 
 
-def raw_key(feed: str, slot: datetime) -> str:
+def raw_key(city: str, feed: str, slot: datetime) -> str:
     stamp = slot.strftime("%Y%m%dT%H%M%SZ")
-    return f"feed={feed}/dt={slot:%Y-%m-%d}/hour={slot:%H}/{feed}_{stamp}.json.gz"
+    return f"city={city}/feed={feed}/dt={slot:%Y-%m-%d}/hour={slot:%H}/{feed}_{stamp}.json.gz"
 
 
-def meta_key(feed: str, slot: datetime) -> str:
-    return raw_key(feed, slot).removesuffix(".json.gz") + ".meta.json"
+def meta_key(city: str, feed: str, slot: datetime) -> str:
+    return raw_key(city, feed, slot).removesuffix(".json.gz") + ".meta.json"
 
 
 @dataclass(frozen=True)
 class SnapshotMeta:
+    city: str
     feed: str
     url: str
     slot_utc: str
