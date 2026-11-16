@@ -1,0 +1,34 @@
+name: Collect
+
+# Step 1 of 2: manual trigger only. The cron schedule is added once a manual run is verified.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two collector runs overlap; queue instead of cancelling a run mid-write.
+concurrency:
+  group: collector
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      STORAGE_BACKEND: r2
+      CITY: nyc
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --locked --no-dev
+      - name: Collect snapshot
+        run: uv run python -m bike_or_bust.collector

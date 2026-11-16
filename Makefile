@@ -1,4 +1,4 @@
-.PHONY: install lint format test check
+.PHONY: install lint format test check storage-check
 install:
 	uv sync
 	uv run pre-commit install
@@ -11,3 +11,5 @@ format:
 test:
 	uv run pytest
 check: lint test
+storage-check:
+	STORAGE_BACKEND=r2 uv run --env-file .env python -m bike_or_bust.check_storage

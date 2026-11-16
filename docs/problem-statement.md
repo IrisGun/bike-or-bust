@@ -2,6 +2,7 @@
 
 - Status: draft
 - Date: 2026-11-ish
+- [Architecture Decision records (ADR)](adr/)
 
 ## 1. Decision this supports
 _Official announment:_
@@ -27,7 +28,7 @@ stations ranked highest, how many really ran out. The model must beat two baseli
 
 If it does not beat both, the project has no value regardless of pipeline quality.
 
-_My defensive words:_ Defo possess its own value, at least a good pipeline quality proves a decent Data Engineer/Analytics Enigneer though. But let's better make it works.
+_My defensive words:_ Defo possesses its own value, at least a good pipeline quality proves a decent Data Engineer/Analytics Enigneer though. But let's better make it works.
 
 ## 4. Open choices (current defaults)
 | # | Choice | Default | Why |
