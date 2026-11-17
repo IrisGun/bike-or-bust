@@ -3,7 +3,7 @@ name: Collect
 on:
   schedule:
     # Each 15 min slot but on a 7th minute offset (avoid the rounded beautiful rush hour)
-    - cron: "7,22,37,52 * * * *"
+    - cron: "5,20,35,50 * * * *"
   workflow_dispatch:
 
 permissions:
