@@ -1,7 +1,7 @@
 # ADR-002: Repo visibility and GitHub Actions budget
 
 - Date: 2026-11-05
-- Status: [Proposed] (action needed: make the repo public)
+- Status: [Accepcted]
 - Author: [Jamie]
 
 ## Context
@@ -28,12 +28,24 @@ Limits (GitHub docs, checked 2026-11-05):
 Make the repo **public**. It is a portfolio project, the repo contains no Citi Bike data, and public
 repos get unlimited free runner time, which the 15-minute and dense-collection phases need.
 
-## Consequences
-- Never put secrets or data in the repo; storage credentials live in GitHub Secrets (ADR-001).
-- Before going public: revoke and replace the personal access token that is embedded in the local
-  `origin` URL, and review the commit history for anything sensitive.
-- The cron is disabled after 60 days of no repo activity: keep commits flowing or add a keep-alive
-  and a monitor that alerts on missing slots.
+## Update 2026-11-17: the GitHub schedule did not fire
+**Observed.**
+- The repo is public and the cron schedule defined by no scheduled job run, while manual `workflow_dispatch` runs succeeded and wrote to R2.
+- Ruled out: cron syntax, disabled workflow, Actions policy, fork or archived repo, committer permissions.
+
+**Similar reports** (all unresolved or only partly resolved):
+- [community/discussions/213232](https://github.com/orgs/community/discussions/213232): public repo, same symptom
+  and the same cron string; the author moved to an external trigger.
+- [community/discussions/185024](https://github.com/orgs/community/discussions/185024): staff linked it to a
+  server-side flag affecting newly created schedules; but reports of the problem continue through October 2026.
+- [community/discussions/201738](https://github.com/orgs/community/discussions/201738): daily cron delayed 8 to
+  14 hours, one run dropped.
+
+**Decision (for now).**
+- Keep the schedule as it is and do not build a workaround yet.
+- If the schedule still does not fire after the EDA on the existing snapshots, add an external scheduler (for example a Cloudflare Workers Cron Trigger) that calls `workflow_dispatch` through a fine-grained GitHub token.
+- Not decided yet which service to use.
+
+**Consequence.**
 - Cron delays and dropped runs create gaps in collection; record them as known gaps.
-- If the repo must stay private, the fallback is hourly cron only (about $4/month of the free quota),
-  which cannot answer the sampling-frequency questions in the problem statement.
+- Missed slots cannot be recovered (the feed only shows the present), so the time series will have gaps until this is fixed.
