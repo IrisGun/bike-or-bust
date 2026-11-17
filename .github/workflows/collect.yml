@@ -1,6 +1,5 @@
 name: Collect
 
-# Step 1 of 2: manual trigger only. The cron schedule is added once a manual run is verified.
 on:
   schedule:
     # Each 15 min slot but on a 7th minute offset (avoid the rounded beautiful rush hour)
