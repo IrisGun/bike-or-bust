@@ -15,6 +15,10 @@ class Storage(Protocol):
 
     def put(self, key: str, data: bytes) -> None: ...
 
+    def get(self, key: str) -> bytes: ...
+
+    def list_keys(self, prefix: str = "") -> list[str]: ...
+
 
 class LocalStorage:
     """Files under a root directory. Writes are atomic: no reader ever sees a partial file."""
@@ -31,6 +35,13 @@ class LocalStorage:
         tmp = path.with_name(path.name + ".tmp")
         tmp.write_bytes(data)
         os.replace(tmp, path)
+
+    def get(self, key: str) -> bytes:
+        return (self.root / key).read_bytes()
+
+    def list_keys(self, prefix: str = "") -> list[str]:
+        keys = (p.relative_to(self.root).as_posix() for p in self.root.rglob("*") if p.is_file())
+        return sorted(k for k in keys if k.startswith(prefix) and not k.endswith(".tmp"))
 
 
 class R2Storage:
@@ -52,6 +63,15 @@ class R2Storage:
 
     def put(self, key: str, data: bytes) -> None:
         self.client.put_object(Bucket=self.bucket, Key=key, Body=data)
+
+    def get(self, key: str) -> bytes:
+        return self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
+
+    def list_keys(self, prefix: str = "") -> list[str]:
+        pages = self.client.get_paginator("list_objects_v2").paginate(
+            Bucket=self.bucket, Prefix=prefix
+        )
+        return sorted(o["Key"] for page in pages for o in page.get("Contents", []))
 
 
 R2_VARS = ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET")

@@ -1,3 +1,5 @@
+import io
+
 import pytest
 from botocore.exceptions import ClientError
 
@@ -23,6 +25,18 @@ class FakeS3:
 
     def put_object(self, Bucket, Key, Body):
         self.puts.append((Bucket, Key, Body))
+
+    def get_object(self, Bucket, Key):
+        return {"Body": io.BytesIO(b"payload:" + Key.encode())}
+
+    def get_paginator(self, name):
+        assert name == "list_objects_v2"
+        return self
+
+    def paginate(self, Bucket, Prefix):
+        keys = ["b/2", "a/1", "b/1"]
+        yield {"Contents": [{"Key": k} for k in keys if k.startswith(Prefix)]}
+        yield {}  # a page with no Contents must not break listing
 
 
 def test_r2_exists_true_when_head_succeeds():
@@ -76,3 +90,21 @@ def test_r2_backend_builds_r2_storage():
 def test_unknown_backend_rejected():
     with pytest.raises(ValueError, match="unknown STORAGE_BACKEND"):
         storage_from_env({"STORAGE_BACKEND": "s4"})
+
+
+def test_local_get_and_list_keys_sorted_by_prefix_ignoring_temp(tmp_path):
+    s = LocalStorage(tmp_path)
+    s.put("city=nyc/b.bin", b"2")
+    s.put("city=nyc/a.bin", b"1")
+    s.put("city=sf/c.bin", b"3")
+    (tmp_path / "city=nyc" / "half.bin.tmp").write_bytes(b"x")
+    assert s.list_keys("city=nyc/") == ["city=nyc/a.bin", "city=nyc/b.bin"]
+    assert s.get("city=nyc/a.bin") == b"1"
+
+
+def test_r2_get_reads_body():
+    assert R2Storage(FakeS3(), "b").get("k") == b"payload:k"
+
+
+def test_r2_list_keys_filters_prefix_sorts_and_handles_empty_page():
+    assert R2Storage(FakeS3(), "b").list_keys("b/") == ["b/1", "b/2"]
