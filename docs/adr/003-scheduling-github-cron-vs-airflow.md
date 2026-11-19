@@ -5,9 +5,14 @@
 - Author: [Jamie]
 
 ## Context
-The collector must run every 15 minutes. GitHub Actions cron is free in a public repo and needs no server, but in about 19 hours only 2 of the ~78 expected scheduled runs started (~97% dropped); the ones that did run were only ~6 minutes late, and dropped runs raise no error. The cause is unknown (GitHub documents scheduled runs as best-effort; see ADR-002). Manual dispatch runs work, so the collector itself is fine.
+- The collector must run every 15 minutes but:
+  - In about 19 hours only 2 of the ~78 expected scheduled runs started (~97% dropped)
+  - The ones that did run were only ~6 minutes late, and dropped runs raise no error
+  - The cause is unknown (GitHub documents scheduled runs as best-effort, see ADR-002).
+  - Manual dispatch runs work, so the collector itself is fine.
+- Consider adopting Airflow to this architecture
 
-## Options
+## Options comparison
 | Criterion | GitHub Actions cron | Airflow (self-hosted) |
 |---|---|---|
 | Retry | None for a failed job; the collector retries HTTP itself | Per-task retries with delay |
@@ -31,6 +36,7 @@ GBFS is a snapshot source: it shows only the present, so a missed tick cannot be
 
 Rule of thumb: if a missed run can be recovered from stored data, invest in idempotency and backfill; if not, invest in the trigger.
 
+_Update on 2026-11-19: Yayyyy, seems like it works. Finally! (Or yet?)_
 ## Consequences
 - Slots lost before the new trigger works are gone; list them in the README known gaps.
 - The trigger adds one secret and one more part to keep running.
