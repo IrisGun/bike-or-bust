@@ -1,0 +1,21 @@
+name = "bike-or-bust-trigger"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+# No public URL: this Worker only runs on the schedule.
+workers_dev = false
+
+[triggers]
+# Minute 1 of each 15-minute slot: the request lands inside the slot the collector floors to
+# (see ADR-003). UTC.
+crons = ["1,16,31,46 * * * *"]
+
+[observability]
+enabled = true
+
+[vars]
+GITHUB_OWNER = "IrisGun"
+GITHUB_REPO = "bike-or-bust"
+WORKFLOW_FILE = "collect.yml"
+GITHUB_REF = "main"
+# Secret (not here): GH_DISPATCH_TOKEN, set with `wrangler secret put GH_DISPATCH_TOKEN`.

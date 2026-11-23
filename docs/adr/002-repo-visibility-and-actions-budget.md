@@ -45,6 +45,7 @@ repos get unlimited free runner time, which the 15-minute and dense-collection p
 - Keep the schedule as it is and do not build a workaround yet.
 - If the schedule still does not fire after the EDA on the existing snapshots, add an external scheduler (for example a Cloudflare Workers Cron Trigger) that calls `workflow_dispatch` through a fine-grained GitHub token.
 - Not decided yet which service to use.
+- Superseded on 2026-11-18 by [ADR-003](003-scheduling-github-cron-vs-airflow.md): the schedule turned out to drop ~97% of runs, so the external trigger is tried now instead of after the EDA.
 
 **Consequence.**
 - Cron delays and dropped runs create gaps in collection; record them as known gaps.

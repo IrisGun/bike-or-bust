@@ -1,0 +1,12 @@
+{
+  "name": "bike-or-bust-trigger",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.164.0"
+  }
+}
